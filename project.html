@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+
+<!-- Александър Велинов, ФН 45416, прочетох К44 -->
+
+<head>
+	<meta charset="utf-8"/>
+
+	<link rel="stylesheet" type="text/css" href="mecho.css">
+	<script src="mecho.min.js"></script>
+
+	<script>
+		var skies = [[0.7, 0.2, 0.5], Mecho.BLACK, Mecho.WHITE, Mecho.YELLOW, Mecho.BLUE, Mecho.RED, Mecho.GREEN, [0.5,0.5,0.5], [0.3, 0.6, 0.4]];
+		var grounds = [Mecho.TILE, Mecho.WOOD, Mecho.GOLD, Mecho.METAL, Mecho.SCRATCH, Mecho.METRIC, Mecho.PAPER, Mecho.ASPHALT,
+		Mecho.MARBLE, Mecho.WATER, Mecho.ROCK, Mecho.ROCK2, Mecho.INDUSTRIAL];
+		var zooms = [5, 8, 11, 14, 17, 20];
+
+		var rot_angle = 32;
+		
+		function main()
+		{
+			scene = new Mecho();
+			scene.onTime = animate;
+			button('light','s',setSky,skies.length,0);
+			button('show','h',showHideGround);
+			button('ground','g',setGround,grounds.length,4);
+			button('show', 'z', zoom, zooms.length, 1);
+						
+			//Вертикалната част на дървената платформа
+			main_box = box([-4.5,0,0], 0.3,1.5,2.5);
+			main_box.material = Mecho.WOOD;
+			
+			//Хоризонталната част на дървената платформа
+			main_box2 = box([-5,0,0], 1,1.5,0.3);
+			main_box2.material = Mecho.WOOD;
+			
+			//Лилавото кубче
+			box1 = box([-4.1, 0, 2], 0.5, 0.5, 0.5);
+			box1.material = [0.7, 0.1, 0.7];
+			
+			//Лилавата хоризонтална шина
+			rail_main = rail([-4.1, -1.5, 2.3], 3, 0.3, 0.1, 0.1);
+			rail_main.material = [0.7, 0.1, 0.7];
+			rail_main.rotV = 90;
+			rail_main.rotH = 90;
+			
+			//yellow1 до yellow6 са жълтите греди, които са по-близо до гледащия при стартиране на програмата
+			yellow1 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			yellow1.material = [Mecho.YELLOW, Mecho.WHITE, Mecho.YELLOW, Mecho.YELLOW];
+			yellow1.center = rail_main.center;
+			yellow1.rotT = 90;
+			
+			yellow2 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			yellow2.material = [Mecho.YELLOW, Mecho.WHITE, Mecho.YELLOW, Mecho.YELLOW];
+			yellow2.rotT = 90;
+			yellow2.center = yellow1.otherPoint;
+			yellow2.centerOffset = [0,0,-0.2];
+
+			// Синята хоризонтална шина
+			rail2 = rail([0,0,0], 2.6, 0.3, 0.1, 0.1);
+			rail2.rotV = 90;
+			rail2.rotH = 90;
+			rail2.center = yellow2.otherPoint;
+			rail2.material = Mecho.BLUE;
+			
+			//Синьото кубче
+			box2 = box([0, 0, 0], 0.5, 0.5, 0.5);
+			box2.material = Mecho.BLUE;
+			box2.centerOffset = [0,1.3,0.05]
+			box2.center = rail2.otherPoint;
+			
+			yellow3 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			yellow3.material = [Mecho.YELLOW, Mecho.WHITE, Mecho.YELLOW, Mecho.YELLOW];
+			yellow3.rotT = 90;
+			yellow3.center = yellow2.otherPoint;
+			
+			yellow4 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			yellow4.material = [Mecho.YELLOW, Mecho.WHITE, Mecho.YELLOW, Mecho.YELLOW];
+			yellow4.rotT = 90;
+			yellow4.center = yellow3.otherPoint;
+			yellow4.centerOffset = [0,0,0.2];
+			
+			//Зелената хоризонтална шина
+			rail3 = rail([0,0,0], 3, 0.3, 0.1, 0.1);
+			rail3.rotV = 90;
+			rail3.rotH = 90;
+			rail3.center = yellow4.otherPoint;
+			rail3.material = Mecho.GREEN;
+			
+			//Зеленото кубче
+			box3 = box([0, 0, 0], 0.5, 0.5, 0.5);
+			box3.material = Mecho.GREEN;
+			box3.centerOffset = [0,1.5,0.05]
+			box3.center = rail3.otherPoint;
+			
+			yellow5 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			yellow5.material = [Mecho.YELLOW, Mecho.WHITE, Mecho.YELLOW, Mecho.YELLOW];
+			yellow5.rotT = 90;
+			yellow5.center = yellow4.otherPoint;
+			
+			yellow6 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			yellow6.material = [Mecho.YELLOW, Mecho.WHITE, Mecho.YELLOW, Mecho.YELLOW];
+			yellow6.rotT = 90;
+			yellow6.center = yellow5.otherPoint;
+			yellow6.centerOffset = [0,0,-0.2];
+			
+			//Червената хоризонтална шина
+			rail4 = rail([0,0,0], 2.6, 0.3, 0.1, 0.1);
+			rail4.rotV = 90;
+			rail4.rotH = 90;
+			rail4.center = yellow6.otherPoint;
+			rail4.material = Mecho.RED;
+			
+			//Червеното кубче
+			box4 = box([0, 0, 0], 0.5, 0.5, 0.5);
+			box4.material = Mecho.RED;
+			box4.centerOffset = [0,1.3,0.05]
+			box4.center = rail4.otherPoint;
+			
+			//Хоризонталната част на подвижния дървен елемент
+			boxFinal = box([0, 0, 0], 0.7, 1, 0.1);
+			boxFinal.material = Mecho.WOOD;
+			boxFinal.centerOffset = [-0.6,1.3,0];
+			boxFinal.center = box4.center;
+			
+			//Вертикалната част на подвижния дървен елемент
+			boxFinal2 = box([0, 0, 0], 0.1, 1, 0.7);
+			boxFinal2.material = Mecho.WOOD;
+			boxFinal2.centerOffset = [-0.3,1.3,0.4];
+			boxFinal2.center = boxFinal.center;
+			
+			//Лилавата вертикална греда
+			vrail1 = rail([-4.1, 0, 1.8], 0.85, 0.3, 0.1, 0.1);
+			vrail1.material = [0.7, 0.1, 0.7];
+			
+			//Златната ръчка, с която в реалния свят би се управлявал механизма
+			lever = beam([0,0,0], 1.9, 0.3, 0.1, 0.4, 0.2, 0.3);
+			lever.material = Mecho.GOLD;
+			lever.rotH = 90;
+			lever.rotS = 120;
+			lever.center = vrail1.otherPoint;
+			
+			//metal1 до metal6 са металните летви отгоре
+			metal1 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			metal1.material = [Mecho.METAL, Mecho.WHITE, Mecho.METAL, Mecho.METAL];
+			metal1.rotH = 90;
+			metal1.rotS = -90;
+			metal1.center = vrail1.otherPoint;
+			
+			metal2 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			metal2.material = [Mecho.METAL, Mecho.WHITE, Mecho.METAL, Mecho.METAL];
+			metal2.rotH = 90;
+			metal2.rotS = -90;
+			metal2.centerOffset = [0,0,0.09];
+			metal2.center = metal1.otherPoint;
+			
+			metal3 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			metal3.material = [Mecho.METAL, Mecho.WHITE, Mecho.METAL, Mecho.METAL];
+			metal3.rotH = 90;
+			metal3.rotS = -90;
+			metal3.center = metal2.otherPoint;
+			
+			metal4 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			metal4.material = [Mecho.METAL, Mecho.WHITE, Mecho.METAL, Mecho.METAL];
+			metal4.rotH = 90;
+			metal4.rotS = -90;
+			metal4.centerOffset = [0,0,-0.09]
+			metal4.center = metal3.otherPoint;
+			
+			//Зелената вертикална шина
+			vrail2 = rail([-4.1, 0, 1.3], 0.85, 0.3, 0.1, 0.1);
+			vrail2.material = Mecho.GREEN;
+			vrail2.rotS = 90;
+			vrail2.centerOffset = [0,0,0.85];
+			vrail2.center = metal4.otherPoint;
+			
+			metal5 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			metal5.material = [Mecho.METAL, Mecho.WHITE, Mecho.METAL, Mecho.METAL];
+			metal5.rotH = 90;
+			metal5.rotS = -90;
+			metal5.center = metal4.otherPoint;
+			
+			metal6 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			metal6.material = [Mecho.METAL, Mecho.WHITE, Mecho.METAL, Mecho.METAL];
+			metal6.rotH = 90;
+			metal6.rotS = -90;
+			metal6.centerOffset = [0,0,0.09]
+			metal6.center = metal5.otherPoint;
+			
+			//yellow7 до yellow12 са по-далечните от гледащия жълти летви при пускането на програмата
+			yellow7 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			yellow7.material = [Mecho.YELLOW, Mecho.WHITE, Mecho.YELLOW, Mecho.YELLOW];
+			yellow7.center = rail_main.otherPoint;
+			yellow7.rotT = 90;
+			
+			yellow8 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			yellow8.material = [Mecho.YELLOW, Mecho.WHITE, Mecho.YELLOW, Mecho.YELLOW];
+			yellow8.rotT = 90;
+			yellow8.center = yellow7.otherPoint;
+			yellow8.centerOffset = [0,0,0.2];
+			
+			yellow9 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			yellow9.material = [Mecho.YELLOW, Mecho.WHITE, Mecho.YELLOW, Mecho.YELLOW];
+			yellow9.rotT = 90;
+			yellow9.center = yellow8.otherPoint;
+			
+			yellow10 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			yellow10.material = [Mecho.YELLOW, Mecho.WHITE, Mecho.YELLOW, Mecho.YELLOW];
+			yellow10.rotT = 90;
+			yellow10.center = yellow9.otherPoint;
+			yellow10.centerOffset = [0,0,-0.2];
+			
+			yellow11 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			yellow11.material = [Mecho.YELLOW, Mecho.WHITE, Mecho.YELLOW, Mecho.YELLOW];
+			yellow11.rotT = 90;
+			yellow11.center = yellow10.otherPoint;
+			
+			yellow12 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			yellow12.material = [Mecho.YELLOW, Mecho.WHITE, Mecho.YELLOW, Mecho.YELLOW];
+			yellow12.rotT = 90;
+			yellow12.center = yellow11.otherPoint;
+			yellow12.centerOffset = [0,0,0.2];
+			
+			//marble1 до marble6 са мраморните летви отдолу
+			marble1 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			marble1.material = Mecho.MARBLE;
+			marble1.rotH = 90;
+			marble1.rotS = -90;
+			marble1.center = vrail1.center;
+			
+			marble2 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			marble2.material = Mecho.MARBLE;
+			marble2.rotH = 90;
+			marble2.rotS = -90;
+			marble2.centerOffset = [0,0,-0.1];
+			marble2.center = marble1.otherPoint;
+			
+			marble3 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			marble3.material = Mecho.MARBLE;
+			marble3.rotH = 90;
+			marble3.rotS = -90;
+			marble3.center = marble2.otherPoint;
+			
+			marble4 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			marble4.material = Mecho.MARBLE;
+			marble4.rotH = 90;
+			marble4.rotS = -90;
+			marble4.centerOffset = [0,0,0.1];
+			marble4.center = marble3.otherPoint;
+			
+			marble5 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			marble5.material = Mecho.MARBLE;
+			marble5.rotH = 90;
+			marble5.rotS = -90;
+			marble5.center = marble4.otherPoint;
+			
+			marble6 = beam([0,0,0], 1.9, 0.2, 0.1, 0.3, 0.2, 0.2);
+			marble6.material = Mecho.MARBLE;
+			marble6.rotH = 90;
+			marble6.rotS = -90;
+			marble6.centerOffset = [0,0,-0.1];
+			marble6.center = marble5.otherPoint;
+		}
+		
+		function animate()
+		{
+			var t = Mecho.time;
+			
+			yellow1.rotS = -45 + rot_angle*sin(t);		
+			yellow2.center = yellow1.otherPoint;
+			yellow2.rotS = 45 - rot_angle*sin(t);
+			rail2.center = yellow2.otherPoint;
+			box2.center = rail2.otherPoint;
+			yellow3.center = yellow2.otherPoint;
+			yellow3.rotS = 45 - rot_angle*sin(t);
+			yellow4.center = yellow3.otherPoint;
+			yellow4.rotS = -45 + rot_angle*sin(t);
+			rail3.center = yellow4.otherPoint;
+			box3.center = rail3.otherPoint;
+			yellow5.center = yellow4.otherPoint;
+			yellow5.rotS = -45 + rot_angle*sin(t);
+			yellow6.center = yellow5.otherPoint;
+			yellow6.rotS = 45 - rot_angle*sin(t);
+			rail4.center = yellow6.otherPoint;
+			box4.center = rail4.otherPoint;
+			boxFinal.center = box4.center;
+			boxFinal2.center = boxFinal.center;	
+			
+			metal1.rotS = -135 + rot_angle*sin(t);
+			metal2.center = metal1.otherPoint;
+			metal2.rotS = -45 - rot_angle*sin(t);
+			metal3.center = metal2.otherPoint;
+			metal3.rotS = -45 - rot_angle*sin(t);
+			metal4.center = metal3.otherPoint;
+			metal4.rotS = -135 + rot_angle*sin(t);
+			vrail2.center = metal4.otherPoint;
+			metal5.center = metal4.otherPoint;
+			metal5.rotS = -135 + rot_angle*sin(t);
+			metal6.center = metal5.otherPoint;
+			metal6.rotS = -45 - rot_angle*sin(t);
+			
+			yellow7.rotS = 45 - rot_angle*sin(t);
+			yellow8.center = yellow7.otherPoint;
+			yellow8.rotS = -45 + rot_angle*sin(t);
+			yellow9.center = yellow8.otherPoint;
+			yellow9.rotS = -45 + rot_angle*sin(t);
+			yellow10.center = yellow9.otherPoint;
+			yellow10.rotS = 45 - rot_angle*sin(t);
+			yellow11.center = yellow10.otherPoint;
+			yellow11.rotS = 45 - rot_angle*sin(t);
+			yellow12.center = yellow11.otherPoint;
+			yellow12.rotS = -45 + rot_angle*sin(t);
+			
+			marble1.rotS = -45 - rot_angle*sin(t);
+			marble2.center = marble1.otherPoint;
+			marble2.rotS = -135 + rot_angle*sin(t);
+			marble3.center = marble2.otherPoint;
+			marble3.rotS = -135 + rot_angle*sin(t);
+			marble4.center = marble3.otherPoint;
+			marble4.rotS = -45 - rot_angle*sin(t);
+			marble5.center = marble4.otherPoint;
+			marble5.rotS = -45 - rot_angle*sin(t);
+			marble6.center = marble5.otherPoint;
+			marble6.rotS = -135 + rot_angle*sin(t);
+			
+			lever.rotS = 90 + rot_angle*sin(t);	
+			
+		}
+		
+		function zoom(){
+			scene.viewObject.distance = zooms[this.state];
+		}
+		
+		function setSky()
+		{
+			scene.sky = skies[this.state];
+		}
+
+		function setGround()
+		{
+			scene.ground = grounds[this.state];
+		}
+		
+		var sh = true;
+		function showHideGround()
+		{
+			sh = !sh;
+			scene.ground = sh;
+		}
+	</script>
+</head>
+
+<body onload="main()">
+	
+</body>
